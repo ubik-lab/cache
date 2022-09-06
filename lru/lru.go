@@ -31,7 +31,7 @@ type entry[K comparable, V any] struct {
 }
 
 // NewLRU constructs an LRU of the given size
-func NewLRU[K comparable, V any](size int, onEvict EvictCallback[K, V]) (*LRU[K, V], error) {
+func New[K comparable, V any](size int, onEvict EvictCallback[K, V]) (*LRU[K, V], error) {
 	if size <= 0 {
 		return nil, errors.New("must provide a positive size")
 	}
