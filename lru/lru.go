@@ -3,12 +3,14 @@
 
 	added:
 		* generics
+		* pool
 */
 
 package lru
 
 import (
 	"errors"
+	"sync"
 
 	"github.com/ubik-lab/container/list"
 )
@@ -22,6 +24,7 @@ type LRU[K comparable, V any] struct {
 	evictList *list.List[*entry[K, V]]
 	items     map[K]*list.Element[*entry[K, V]]
 	onEvict   EvictCallback[K, V]
+	pool      sync.Pool
 }
 
 // entry is used to hold a value in the evictList
@@ -41,6 +44,9 @@ func New[K comparable, V any](size int, onEvict EvictCallback[K, V]) (*LRU[K, V]
 		items:     make(map[K]*list.Element[*entry[K, V]]),
 		onEvict:   onEvict,
 	}
+	c.pool.New = func() any {
+		return &entry[K, V]{}
+	}
 	return c, nil
 }
 
@@ -51,6 +57,7 @@ func (c *LRU[K, V]) Purge() {
 			c.onEvict(k, v.Value.value)
 		}
 		delete(c.items, k)
+		c.pool.Put(v.Value)
 	}
 	c.evictList.Init()
 }
@@ -65,7 +72,9 @@ func (c *LRU[K, V]) Add(key K, value V) (evicted bool) {
 	}
 
 	// Add new item
-	ent := &entry[K, V]{key, value}
+	ent := c.pool.Get().(*entry[K, V])
+	ent.key = key
+	ent.value = value
 	entry := c.evictList.PushFront(ent)
 	c.items[key] = entry
 
@@ -175,4 +184,5 @@ func (c *LRU[K, V]) removeElement(e *list.Element[*entry[K, V]]) {
 	if c.onEvict != nil {
 		c.onEvict(kv.key, kv.value)
 	}
+	c.pool.Put(kv)
 }

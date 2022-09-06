@@ -3,6 +3,7 @@
 
 	added:
 		* generics
+		* pool
 */
 
 package lru
