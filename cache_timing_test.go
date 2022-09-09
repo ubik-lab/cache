@@ -23,7 +23,7 @@ func BenchmarkLRUSet(b *testing.B) {
 	}
 }
 
-func BenchmarkHoshiCorpkLRUSet(b *testing.B) {
+func BenchmarkHoshiCorpLRUSet(b *testing.B) {
 	const items = 1 << 16
 	c, _ := simplelru.NewLRU(256, nil)
 
@@ -58,7 +58,7 @@ func BenchmarkLRUGet(b *testing.B) {
 	}
 }
 
-func BenchmarkHoshiCorpkLRUGet(b *testing.B) {
+func BenchmarkHoshiCorpLRUGet(b *testing.B) {
 	const items = 1 << 16
 	c, _ := simplelru.NewLRU(256, nil)
 
