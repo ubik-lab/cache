@@ -1,6 +1,15 @@
 package cache
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/ubik-lab/cache/lru"
+)
+
+const (
+	// DefaultCacheSize defines the default size to store key/val
+	DefaultCacheSize = 16
+)
 
 // ICache is a common-cache interface.
 type ICache[K comparable, V any] interface {
@@ -18,6 +27,15 @@ type Cache[K comparable, V any] struct {
 // New creates a new thread safe Cache.
 func New[K comparable, V any](cache ICache[K, V]) *Cache[K, V] {
 	return &Cache[K, V]{cache: cache}
+}
+
+// LRU returns new lru cache
+func LRU[K comparable, V any](size int) *lru.LRU[K, V] {
+	if size <= 0 {
+		size = DefaultCacheSize
+	}
+	c, _ := lru.New[K, V](size, nil)
+	return c
 }
 
 // Add adds a value to the cache. Returns true if an eviction occurred.
